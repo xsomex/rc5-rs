@@ -1,6 +1,9 @@
 #![feature(wrapping_int_impl)]
+#![no_std]
 
-use std::{cmp::max, num::Wrapping, usize};
+use core::{cmp::max, num::Wrapping, usize};
+extern crate alloc;
+use alloc::vec::Vec;
 
 pub struct RC5<W> {
     expanded_key: Vec<Wrapping<W>>,
@@ -44,7 +47,7 @@ macro_rules! impl_rc5 {
                 let key_words_len =
                     key.len() / ($word_size / 8) + ((key.len() % ($word_size / 8) > 0) as usize);
                 let mut key_words =
-                    vec![Wrapping(<$num_type as From<$num_type>>::from(0)); key_words_len];
+                    alloc::vec![Wrapping(<$num_type as From<$num_type>>::from(0)); key_words_len];
 
                 for i in (0..key.len()).rev() {
                     key_words[i / ($word_size / 8)] = key_words[i / ($word_size / 8)]
@@ -53,7 +56,7 @@ macro_rules! impl_rc5 {
                 }
 
                 let mut expanded_key =
-                    vec![Wrapping(<$num_type as From<$num_type>>::from(0)); 2 * (nb_of_rounds + 1)];
+                    alloc::vec![Wrapping(<$num_type as From<$num_type>>::from(0)); 2 * (nb_of_rounds + 1)];
 
                 expanded_key[0] = Wrapping($p);
 
@@ -86,6 +89,6 @@ macro_rules! impl_rc5 {
     };
 }
 
-impl_rc5!(u16, 16, 0, 0);
-impl_rc5!(u32, 32, 0xB7E1_5163, 0x9E37_79B9);
-impl_rc5!(u64, 64, 0, 0);
+impl_rc5!(u16, 16, 0xB7E1,                0x9E37);
+impl_rc5!(u32, 32, 0xB7E1_5163,           0x9E37_79B9);
+impl_rc5!(u64, 64, 0xB7E1_5162_8AED_2A6B, 0x9E37_79B9_7F4A7_C15);
